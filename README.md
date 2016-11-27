@@ -1,7 +1,7 @@
 # ChIP-seq
-ChIP-seq Data Aanlaysis Pipline
+Time saving ChIP-seq Scripts instead of learing lots of bioinformatic tools
 
-1. Mapping: STAR,Bowtie
+1. Mapping: STAR,Bowtie2
 2. PeaksCalling: MACS2
 3. Differential Peaks: MACS2
 4. Annotation: CEAS, ChipseqAnno, GREAT, ChIPseeker, annotatePeaks.pl
