@@ -1,0 +1,25 @@
+ 
+
+Lift genome positions
+Genome positions are best represented in BED format. UCSC provides tools to convert BED file from one genome assembly to another.
+
+Binary liftOver tool
+
+We need liftOver binary from UCSC and hg18 to hg 19 chain file.
+
+Provide BED format file (e.g. input.bed)
+
+    NOTE: Use the 'chr' before each chromosome name
+
+    chr1    743267  743268  rs3115860
+    chr1    766408  766409  rs12124819
+    chr1    773885  773886  rs17160939
+    Run liftOver:
+
+    (1) download liftOver http://hgdownload.cse.ucsc.edu/admin/exe/ 
+    (2) chmod +x liftOver
+    (3) download chain file http://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/ 
+    (4) prepare input bed file (chr start end others ...)
+    (5) run liftOver
+    ./liftOver input.bed hg18ToHg19.over.chain.gz output.bed unlifted.bed
+    unlifted.bed file will contain all genome positions that cannot be lifted. The reason for that varies. See Various reasons that lift over could fail
