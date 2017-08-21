@@ -7,16 +7,10 @@ log () {
     echo
 }
 
-sample=(CHG023811 CHG023812 CHG023813 CHG023814 CHG023815 CHG023816)
-sample_alias=(WT-CTNNB-ChIP WT-SOX21-ChIP SK13-CTNNB-ChIP WT-CTNNB-Input WT-S21-Input SK13-CTNNB-Input)
-
-
-
-
-treat=(WT-CTNNB-ChIP WT-SOX21-ChIP SK13-CTNNB-ChIP)
-input=(WT-CTNNB-Input WT-S21-Input SK13-CTNNB-Input)
-name=(WT-CTNNB SOX21 SK13-CTNNB)
-outdir="macs_out_q0.01"
+treat=(CT1-0-D4-soxlchip CT1-0-d8-elute_combined_R1 IWP2-d8-elute_combined_R1)
+input=(CT1-0-D4-input CT1-0-d8-input_combined_R1 IWP2-d8-input_combined_R1)
+name=(CT1.0-D4-SOX1 CT1.0-D8-SOX1 IWP2-D8-SOX1)
+outdir="macs_out"
 outdir2="macs_out_nomodel"
 
 
@@ -26,10 +20,10 @@ mkdir -p $outdir2
 
 for idx in 0 1 2  
     do
-        #default parameters, add --call-summits if needed, use -f BAMPE for paired reads
-        macs2 callpeak -t ./bowtie_out/${treat[idx]}.highQuality.sorted.bam  -c ./bowtie_out/${input[idx]}.highQuality.sorted.bam -f BAMPE -g hs --outdir ${outdir} -n ${name[idx]} -B  -q 0.01
+        #default parameters, add --call-summits if needed
+        #macs2 callpeak -t ./bowtie_out/${treat[idx]}.highQuality.sorted.bam  -c ./bowtie_out/${input[idx]}.highQuality.sorted.bam -f BAM -g hs --outdir ${outdir} -n ${name[idx]} -B  -q 0.05
         # --nomodel
-        #macs2 callpeak -t ./bowtie_out/${treat[idx]}.highQuality.sorted.bam  -c ./bowtie_out/${input[idx]}.highQuality.sorted.bam -f BAMPE -g hs --outdir ${outdir2} -n ${name[idx]} -B -q 0.05 --nomodel --extsize 200 
+        #macs2 callpeak -t ./bowtie_out/${treat[idx]}.highQuality.sorted.bam  -c ./bowtie_out/${input[idx]}.highQuality.sorted.bam -f BAM -g hs --outdir ${outdir2} -n ${name[idx]} -B -q 0.05 --nomodel --extsize 200 
         echo $idx
 done
 
@@ -38,12 +32,11 @@ done
 find . -name "*.bdg" | while read var;
 do
     log "convert bdg to bw, $var"
-    svar=${var%%.bdg}
-    LC_COLLATE=C sort -k1,1 -k2,2n $var > ${svar}.sorted.bdg
-    bash step3_bigwig_coversion_from_macs2_bdg.sh ${svar}.sorted.bdg $chrominfo 
+    LC_COLLATE=C sort -k1,1 -k2,2n $var > ${var}.sorted 
+    bash step3_bigwig_coversion_from_macs2_bdg.sh ${var}.sorted $chrominfo 
 done
 
-find . -name "*.sorted.bdg" | xargs rm
+find . -name "*bdg.sorted" | xargs rm
 log "bw conversion done"
 
 #for histone
