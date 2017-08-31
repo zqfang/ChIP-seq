@@ -20,9 +20,9 @@ mkdir -p $outdir
 for idx in 0 1 2  
     do
         log "start beta plus: ${name[idx]}"
-        BETA plus -p macs_out/${name[idx]}_summits.bed -e expr_deseq2/diff_Ctrl_${expression[idx]}_results.genename.txt -k O --info 1,3,7 -g hg19  --gname2 --gs ${genome} --bl -n ${expression[idx]} -o beta_${name[idx]}
+        BETA plus -p macs_out/${name[idx]}_summits.bed -e expr_deseq2/diff_Ctrl_${expression[idx]}_results.genename.txt -k O --da 1 --df 0.05  --info 1,3,7 -g hg19  --gname2 --gs ${genome} --bl --mn 0.05 -c 0.01 -n ${expression[idx]}  -o beta_${name[idx]}_fdr0.05
         log "start beta plus on no model results: ${name[idx]}"
-        BETA plus -p macs_out_nomodel/${name[idx]}_summits.bed -e expr_deseq2/diff_Ctrl_${expression[idx]}_results.genename.txt -k O --info 1,3,7 -g hg19  --gname2 --gs ${genome} --bl -n ${expression[idx]} -o beta_nomodel_${name[idx]}
+        #BETA plus -p macs_out_nomodel/${name[idx]}_summits.bed -e expr_deseq2/diff_Ctrl_${expression[idx]}_results.genename.txt -k O --info 1,3,7 -g hg19  --gname2 --gs ${genome} --bl -n ${expression[idx]} -o beta_nomodel_${name[idx]}
 done
 
 log "finished"
@@ -32,7 +32,6 @@ log "finished"
 #--bl is an optional parameters, it is on when some boundaries considered
 #-p specifies the name of TF binding data
 #-e specifies the name of the corresponding differential expression data
-
 # -k LIM --info 1,3,7 is required
 #-k LIM stand for the LIMMA Format, {LIM,CUF,BSF,O}, DESeq2: -k O --info 1,3,7
 # --info specify the geneID, up/down status and statistcal values column of your expression data. 
