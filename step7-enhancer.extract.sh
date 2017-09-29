@@ -17,12 +17,12 @@ log () {
 
 tss="hg19.tss.bed"
 #p300="GSM602291_ESC_hg19_p300_calls.bed"
-p300="GSM1003513_hg19_p300.bed"
+p300="GSM602291_ESC_hg19_p300_calls.bed"
 h3k4me3="FinalIDR_hESC_H3K4me3_macs2.regionPeak.narrowpeak"
 h3k4me1="hESC_H3K4me1_peakSet_qval_005_FC_1_5.bed"
 h3k27me3="hESC_H3K27me3_peakSet_qval_005_FC_1_5.bed"
 h3k27ac="FinalIDR_hESC_H3K27ac_macs2.regionPeak.narrowpeak"
-h3k27ac_diff="FinalIDR_hESC_H3K27ac_macs2.regionPeak.narrowpeak"
+h3k27ac_diff="FinalIDR_NE_H3K27ac_macs2.regionPeak.narrowpeak"
 
 #### ouput bed file names ###########
 
@@ -58,8 +58,8 @@ poi2act="enhancers.poised2active.bed"
 ######### extract bound regions in tss 2kb window ###############
 
 
-bedtools window -a hg19.tss.bed \
-                -b macs_out_q0.01/SOX21_peaks.narrowPeak -w 2000 -u > enhancers/SOX21.peaks.tss.bed
+# bedtools window -a hg19.tss.bed \
+#                 -b macs_out_q0.01/SOX21_peaks.narrowPeak -w 2000 -u > enhancers/SOX21.peaks.tss.bed
 
 
 # p300 enhancer locations
@@ -80,6 +80,7 @@ cut -f 1,2,3 ${h3k4me3} > h3k4me3cut.bed
 cut -f 1,2,3 ${h3k27ac} > h3k27accut.bed
 cut -f 1,2,3 ${h3k27ac_diff} > h3k27ac_diffcut.bed
 cut -f 1,2,3 ${tss} > tsscut.bed
+
 bedtools window -a h3k27me3cut.bed \
                 -b p300cut.bed  \
                 -w 1000 | cut -f 4- > ${tempdir}/p300.in.h3k27me3.1000.window.bed
@@ -92,6 +93,7 @@ bedtools window -a h3k27me3cut.bed \
 bedtools window -a h3k27accut.bed \
                 -b ${tempdir}/p300.in.h3k27me3.1000.window.bed \
                 -w 1000 | cut -f 4- > ${tempdir}/p300.in.h3k27me3.in.h3k27ac.1000.window.bed
+
 bedtools subtract -a ${tempdir}/p300.in.h3k27me3.1000.window.bed \
                    -b ${tempdir}/p300.in.h3k27me3.in.h3k27ac.1000.window.bed \
                    -A  > ${tempdir}/p300.in.h3k27me3.not.in.h3k27ac.1000.window.bed
@@ -101,11 +103,11 @@ bedtools subtract -a ${tempdir}/p300.in.h3k27me3.1000.window.bed \
 
 tempa="${tempdir}/p300.in.h3k27me3.not.in.h3k27ac.1000.window.bed"
 bedtools subtract -a ${tempa} \
-                   -b h3k4me3cut.bed -A >  ${tempa}.not.h3k4me3
+               -b h3k4me3cut.bed -A >  ${tempa}.not.h3k4me3
 # exclude tss regions 2.5 kb?
-bedtools window -a tsscut.bed \
+bedtools window -a ${tss} \
                 -b ${tempa}.not.h3k4me3 \
-                -l 2500 -r 0 -sw | cut -f 4- > ${tempa}.not.h3k4me3.within.tss2500
+                -l 2500 -r 0 -sw | cut -f 7- > ${tempa}.not.h3k4me3.within.tss2500
 bedtools subtract -a ${tempa}.not.h3k4me3 \
                    -b ${tempa}.not.h3k4me3.within.tss2500 \
                    -A  > ${poiEns}
@@ -135,9 +137,9 @@ tempa="${tempdir}/p300.in.h3k27ac.not.in.h3k27me3.1000.window.bed"
 bedtools subtract -a ${tempa} \
                    -b h3k4me3cut.bed -A >  ${tempa}.not.h3k4me3
 # exclude tss regions 2.5 kb?
-bedtools window -a tsscut.bed \
+bedtools window -a ${tss} \
                 -b ${tempa}.not.h3k4me3 \
-                -l 2500 -r 0 -sw | cut -f 4-  > ${tempa}.not.h3k4me3.within.tss2500
+                -l 2500 -r 0 -sw | cut -f 7-  > ${tempa}.not.h3k4me3.within.tss2500
 bedtools subtract -a ${tempa}.not.h3k4me3 \
                    -b ${tempa}.not.h3k4me3.within.tss2500 \
                    -A > ${actEns}
@@ -176,9 +178,9 @@ tempa="${tempdir}/h3k4me1.not.in.both.h3k27me3.h3k27ac.1000.window.bed"
 bedtools subtract -a ${tempa} \
                    -b h3k4me3cut.bed -A >  ${tempa}.not.h3k4me3
 # exclude tss regions 2.5 kb?
-bedtools window -a tsscut.bed \
+bedtools window -a ${tss} \
                 -b ${tempa}.not.h3k4me3 \
-                -l 2500 -r 0 -sw | cut -f 4- > ${tempa}.not.h3k4me3.within.tss2500
+                -l 2500 -r 0 -sw | cut -f 7- > ${tempa}.not.h3k4me3.within.tss2500
 bedtools subtract -a ${tempa}.not.h3k4me3 \
                    -b ${tempa}.not.h3k4me3.within.tss2500 \
                    -A  > ${primedEns}
@@ -194,7 +196,7 @@ bedtools window -a h3k27ac_diffcut.bed \
                 -b ${poiEns} \
                 -w 1000 | cut -f 4-  > ${poi2act}
 
-log "poised to active enhancers save to: ${poiEns} "
+log "poised to active enhancers save to: ${poi2act} "
 
 log "finished"
 
