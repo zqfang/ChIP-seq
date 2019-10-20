@@ -1,17 +1,39 @@
 
-### 1. NGS pipeline
+## Fast NGS
+Make bioinfo uncool again
 
-Tips: run command in background
+### 1. Linux command line 
+
+a. OhMyZsh, make terminal cool
 ```bash
+# install zsh
+sudo apt-get install zsh # ubuntu
+# change default shell to zsh
+chsh -s /usr/bin/zsh
+# install ohmyzsh
+sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+source ~/.zshrc
+```
+
+b. Terminal keyboard short cuts  
+- skip to head: `Ctrl + a`  
+- skip to end: `Ctrl + e`  
+- delete whole line: `Ctrl + u`
+
+
+c. Tips for command line
+```bash
+# run cmd in background
 nohup command [options] &
 ```
+
+### 2. Mapping
 
 Step 0: install software 
 ```bash
 conda install -c bioconda bowtie2 samtools deeptools
 ```
-
-
 
 step 1: build index
 ```bash
@@ -64,7 +86,7 @@ bamCoverage -p ${threads} \
 ```
 
 
-### 2. Down stream
+### 3. Down stream
 
 #### ChIP-seq
 
