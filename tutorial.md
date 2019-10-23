@@ -22,10 +22,26 @@ b. Terminal keyboard short cuts
 - delete whole line: `Ctrl + u`
 
 
-c. Tips for command line
+c. Tips for command line  
+
+* run cmd in background
 ```bash
-# run cmd in background
 nohup command [options] &
+```
+* some handy tricks for handling filepath
+
+```bash
+# e.g.
+var=./home/fastq/filename_R1.fq.gz
+
+# extract filename
+var1=${var##*/} 
+## the value of ${var1} is filename_R1.fq.gz
+
+# remove file suffix
+var2=${var1%%_R*} 
+## the value of ${var2} is filename
+
 ```
 
 ### 2. Mapping
@@ -166,7 +182,7 @@ step2: mapping
 ```bash
 hisat2 --dta --threads ${threads} \
              -x hisat2_index/hg38 \
-             --known-splice-sites hisat2_index/splicesites.txt \
+             --known-splicesite-infile hisat2_index/splicesites.txt \
              -1 R1.fq.gz \
              -2 R2.fq.gz \
              -S output.sam
