@@ -7,8 +7,9 @@ $ git clone http://github.com/some.repo.git
 
 # add files and push to remote repo
 $ git add file1.txt file2.txt ...
+$ git add --all
 $ git commit -m "any words here"
-$ git push
+$ git push 
 
 # merge local code from remote repo
 $ git pull

@@ -37,7 +37,7 @@ conda install -c bioconda bowtie2 samtools deeptools
 
 step 1: build index
 ```bash
-bowtie2-build hg38.fa index/hg38
+bowtie2-build hg38.fa bowtie2_index/hg38
 ```
 step 2: mapping
 
@@ -142,8 +142,70 @@ step 2: advanced analysis
 #### RNA-seq
 
 ```bash
-conda install htseq 
+conda install htseq hisat2 stringtie 
 ```
+
+step 1: build index and extract splice sites
+
+* indexing
+```bash
+hisat2-build -p {threads} genome/hg38.fa  hisat2_index/hg38
+
+```
+
+* extract known splice sites for alignmnet
+```bash
+
+hisat2_extract_splice_sites.py gencode.gtf > hisat2_index/splicesites.txt 
+hisat2_extract_exons.py gencode.gtf > histat2_index/exon.txt
+```
+
+
+
+step2: mapping
+```bash
+hisat2 --dta --threads ${threads} \
+             -x hisat2_index/hg38 \
+             --known-splice-sites hisat2_index/splicesites.txt \
+             -1 R1.fq.gz \
+             -2 R2.fq.gz \
+             -S output.sam
+```
+
+step 3: sam to bam
+```bash
+samtools view -Sbh  -q 25 \
+              -@ ${threads}  \
+              -o ouput.bam \
+              input.sam
+
+```
+
+step 4: bam sort and index
+```bash
+samtools sort -@ ${threads} input.bam > output.sorted.bam 
+samtools index input.sorted.bam #generate input.sorted.bam.bai
+
+```
+
+step 5: bam to bigwig
+
+```bash
+bamCoverage -p ${threads} \
+            --normalizeUsing RPKM \ # note: other normalization options 
+            -b input.sorted.bam \
+            -o output.bw
+
+```
+
+
+
+
+
+
+
+
+
 
 
 step 1: count reads
