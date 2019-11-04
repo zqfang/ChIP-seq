@@ -253,7 +253,7 @@ database <- round(as.matrix(database))
 condition <- factor(c("KO","KO", "WT","WT"), levels = c("WT", "KO"))
 
 coldata <- data.frame(row.names = colnames(database), condition)
-dds <- DESeqDataSetFromMatrix(countData=database, colData=coldata, design=~condition)
+dds <- DESeqDataSetFromMatrix(countData=database, colData=coldata, design=~condition + treatmement)
 ```
 
 
@@ -288,3 +288,89 @@ GO
 #### 3.4 Alternative splicing analysis
 
 rMATS
+
+
+
+
+
+### 4. Fast RNA-seq
+
+salmon or kaliosto 
+
+step 0: install salmon and download transcriptome cdna from gencode
+```bash
+conda install salmon
+wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.transcripts.fa.gz
+```
+
+step 1. build salmon index
+```bash
+salmon index -p 8 --gencode -t gencode.v32.transcripts.fa.gz -i salmonIndex_hg38
+```
+
+step 2: quantification
+```bash
+salmon quant -i salmonIndex_hg38 -l A \
+         -1 ${fn}/${samp}_1.fastq.gz \
+         -2 ${fn}/${samp}_2.fastq.gz \
+         -p 8 --validateMappings -o quants/${samp}_quant
+```
+
+step 3: merge quantification outputs
+
+(1) use salmon quantmerge
+```bash
+salmon quantmerge
+
+```
+(2) use tximport in R
+```R
+  # R code
+  library(tximport)
+  library(readr)
+  suppressMessages(library('EnsDb.Hsapiens.v86'))
+
+  txdb <- EnsDb.Hsapiens.v86
+  k <- keys(txdb, keytype = "GENEID")
+  df <- select(txdb, keys = k, keytype = "GENEID", columns = c("TXID","GENEID"))
+  tx2gene <- df[, 2:1]  # tx ID, then gene ID
+
+  #tx2gene <- read.table(tx2gene, header= T, sep="\t", stringsAsFactors = F)
+  samples <- unlist(strsplit(sample_ids,","))
+  salmon.files <- file.path('salmon',samples, "quant.sf")
+  names(salmon.files) <- samples
+  all(file.exists(salmon.files))
+
+  #aggregate transcripts to genes, and extract raw read counts  
+  #add ignoreTxVersion to remove id versions
+  #txi.salmon <- tximport(salmon.files, type = "salmon", 
+  #                       tx2gene = tx2gene, countsFromAbundance = "no")
+  txi.transcripts <- tximport(salmon.files, type = "salmon", 
+                              txOut = TRUE, tx2gene = tx2gene,)
+                         #     ignoreTxVersion = TRUE)
+
+  txi.salmon <- summarizeToGene(txi.transcripts, tx2gene)
+
+  #save raw counts 
+  salmon.counts<- txi.salmon$counts
+  salmon.counts<- as.data.frame(salmon.counts)
+  write.table(salmon.counts, out_counts, sep="\t", quote=F)
+  
+  #save gene tpms
+  salmon.TPM<- txi.salmon$abundance
+  salmon.TPM<- as.data.frame(salmon.TPM)
+  write.table(salmon.TPM, out_tpm, sep="\t", quote=F)
+  #save transcripts tpms
+  salmon.trans.TPM<- txi.transcripts$abundance
+  salmon.trans.TPM<- as.data.frame(salmon.trans.TPM)
+  write.table(salmon.trans.TPM, outTrans_tpm, sep="\t", quote=F)
+   
+  save(txi.salmon, file=out_image)
+
+```
+
+
+
+step 4: Differentially expressed gene analysis
+
+DESeq2 pipeline
